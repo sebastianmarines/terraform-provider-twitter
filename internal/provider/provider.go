@@ -3,10 +3,14 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
+	"github.com/dghubble/go-twitter/twitter"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -19,8 +23,7 @@ type provider struct {
 	// communicate with the upstream service. Resource and DataSource
 	// implementations can then make calls using this client.
 	//
-	// TODO: If appropriate, implement upstream provider SDK or HTTP client.
-	// client vendorsdk.ExampleClient
+	client *twitter.Client
 
 	// configured is set to true at the end of the Configure method.
 	// This can be used in Resource and DataSource implementations to verify
@@ -35,7 +38,8 @@ type provider struct {
 
 // providerData can be used to store data from the Terraform configuration.
 type providerData struct {
-	Example types.String `tfsdk:"example"`
+	ApiKey       types.String `tfsdk:"api_key"`
+	ApiSecretKey types.String `tfsdk:"api_secret_key"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -47,11 +51,64 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Example.Null { /* ... */ }
+	var apiKey string
+	var apiSecretKey string
 
-	// If the upstream provider SDK or HTTP client requires configuration, such
-	// as authentication or logging, this is a great opportunity to do so.
+	if data.ApiKey.Unknown {
+		resp.Diagnostics.AddWarning(
+			"Missing Twitter API key",
+			"The Twitter API key is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	if data.ApiKey.Null {
+		apiKey = os.Getenv("TWITTER_API_KEY")
+	} else {
+		apiKey = data.ApiKey.Value
+	}
+
+	if apiKey == "" {
+		resp.Diagnostics.AddWarning(
+			"Missing Twitter API key",
+			"The Twitter API key is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	if data.ApiSecretKey.Unknown {
+		resp.Diagnostics.AddError(
+			"Missing Twitter API secret key",
+			"The Twitter API secret key is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	if data.ApiSecretKey.Null {
+		apiSecretKey = os.Getenv("TWITTER_API_SECRET_KEY")
+	} else {
+		apiSecretKey = data.ApiSecretKey.Value
+	}
+
+	if apiSecretKey == "" {
+		resp.Diagnostics.AddError(
+			"Missing Twitter API secret key",
+			"The Twitter API secret key is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	config := &clientcredentials.Config{
+		ClientID:     apiKey,
+		ClientSecret: apiSecretKey,
+		TokenURL:     "https://api.twitter.com/oauth2/token",
+	}
+
+	httpClient := config.Client(oauth2.NoContext)
+
+	client := twitter.NewClient(httpClient)
+
+	p.client = client
 
 	p.configured = true
 }
@@ -64,17 +121,25 @@ func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceT
 
 func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSourceType, diag.Diagnostics) {
 	return map[string]tfsdk.DataSourceType{
-		"scaffolding_example": exampleDataSourceType{},
+		"twitter_scaffolding_example": exampleDataSourceType{},
+		"twitter_stellar_restaurant":  restaurantDataSourceType{},
 	}, nil
 }
 
 func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"example": {
-				MarkdownDescription: "Example provider attribute",
+			"api_key": {
+				MarkdownDescription: "Twitter API key",
 				Optional:            true,
 				Type:                types.StringType,
+				Sensitive:           true,
+			},
+			"api_secret_key": {
+				MarkdownDescription: "Twitter API secret key",
+				Optional:            true,
+				Type:                types.StringType,
+				Sensitive:           true,
 			},
 		},
 	}, nil
