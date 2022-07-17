@@ -6,11 +6,10 @@ import (
 	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -23,7 +22,7 @@ type provider struct {
 	// communicate with the upstream service. Resource and DataSource
 	// implementations can then make calls using this client.
 	//
-	client *twitter.Client
+	client twitter.Client
 
 	// configured is set to true at the end of the Configure method.
 	// This can be used in Resource and DataSource implementations to verify
@@ -40,6 +39,8 @@ type provider struct {
 type providerData struct {
 	ApiKey       types.String `tfsdk:"api_key"`
 	ApiSecretKey types.String `tfsdk:"api_secret_key"`
+	AccessToken  types.String `tfsdk:"access_token"`
+	AccessSecret types.String `tfsdk:"access_token_secret"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -53,6 +54,8 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 
 	var apiKey string
 	var apiSecretKey string
+	var accessToken string
+	var accessTokenSecret string
 
 	if data.ApiKey.Unknown {
 		resp.Diagnostics.AddWarning(
@@ -98,17 +101,57 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	config := &clientcredentials.Config{
-		ClientID:     apiKey,
-		ClientSecret: apiSecretKey,
-		TokenURL:     "https://api.twitter.com/oauth2/token",
+	if data.AccessToken.Unknown {
+		resp.Diagnostics.AddWarning(
+			"Missing Twitter access token",
+			"The Twitter access token is not configured. The Twitter provider will not be able to function.",
+		)
+		return
 	}
 
-	httpClient := config.Client(oauth2.NoContext)
+	if data.AccessToken.Null {
+		accessToken = os.Getenv("TWITTER_ACCESS_TOKEN")
+	} else {
+		accessToken = data.AccessToken.Value
+	}
+
+	if accessToken == "" {
+		resp.Diagnostics.AddError(
+			"Missing Twitter access token",
+			"The Twitter access token is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	if data.AccessSecret.Unknown {
+		resp.Diagnostics.AddWarning(
+			"Missing Twitter access secret",
+			"The Twitter access secret is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	if data.AccessSecret.Null {
+		accessTokenSecret = os.Getenv("TWITTER_ACCESS_TOKEN_SECRET")
+	} else {
+		accessTokenSecret = data.AccessSecret.Value
+	}
+
+	if accessTokenSecret == "" {
+		resp.Diagnostics.AddError(
+			"Missing Twitter access secret",
+			"The Twitter access secret is not configured. The Twitter provider will not be able to function.",
+		)
+		return
+	}
+
+	config := oauth1.NewConfig(apiKey, apiSecretKey)
+	token := oauth1.NewToken(accessToken, accessTokenSecret)
+	httpClient := config.Client(oauth1.NoContext, token)
 
 	client := twitter.NewClient(httpClient)
 
-	p.client = client
+	p.client = *client
 
 	p.configured = true
 }
@@ -121,8 +164,7 @@ func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceT
 
 func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSourceType, diag.Diagnostics) {
 	return map[string]tfsdk.DataSourceType{
-		"twitter_scaffolding_example": exampleDataSourceType{},
-		"twitter_stellar_restaurant":  restaurantDataSourceType{},
+		"twitter_tweet": tweetDataSourceType{},
 	}, nil
 }
 
@@ -137,6 +179,18 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 			},
 			"api_secret_key": {
 				MarkdownDescription: "Twitter API secret key",
+				Optional:            true,
+				Type:                types.StringType,
+				Sensitive:           true,
+			},
+			"access_token": {
+				MarkdownDescription: "Twitter access token",
+				Optional:            true,
+				Type:                types.StringType,
+				Sensitive:           true,
+			},
+			"access_token_secret": {
+				MarkdownDescription: "Twitter access token secret",
 				Optional:            true,
 				Type:                types.StringType,
 				Sensitive:           true,
