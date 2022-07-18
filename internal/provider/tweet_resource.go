@@ -111,14 +111,19 @@ func (r tweetResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 		IncludeEntities:  twitter.Bool(false),
 	}
 
-	tweet, _, err := r.provider.client.Statuses.Show(data.ID.Value, params)
+	tweet, response, err := r.provider.client.Statuses.Show(data.ID.Value, params)
 
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Could not read tweet",
-			fmt.Sprintf("Unable to read tweet, got error: %s", err),
-		)
-		return
+		if response.StatusCode == 404 {
+			resp.State.RemoveResource(ctx)
+			return
+		} else {
+			resp.Diagnostics.AddError(
+				"Could not read tweet",
+				fmt.Sprintf("Unable to read tweet, got error: %d, %s", response.StatusCode, err),
+			)
+			return
+		}
 	}
 
 	data.ID = types.Int64{Value: tweet.ID}
