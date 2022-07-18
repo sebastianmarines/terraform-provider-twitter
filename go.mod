@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-twitter
+module github.com/sebastianmarines/terraform-provider-twitter
 
 go 1.17
 
