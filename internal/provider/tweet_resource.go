@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/validators"
 )
 
 var _ tfsdk.ResourceType = tweetResourceType{}
@@ -32,7 +33,9 @@ func (t tweetResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					tfsdk.RequiresReplace(),
 				},
-				// TODO Add length validation
+				Validators: []tfsdk.AttributeValidator{
+					validators.TweetLength(),
+				},
 			},
 			"user_id": {
 				MarkdownDescription: "Tweet user id",
