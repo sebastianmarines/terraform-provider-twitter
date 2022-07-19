@@ -208,26 +208,19 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 		return
 	}
 
-	params := &twitter.AccountUpdateProfileParams{
-		URL:         "",
-		Location:    "",
-		Description: "",
-	}
+	urlLocation := "https://api.twitter.com/1.1/account/update_profile.json?url=&location=&description="
 
-	_, _, err := r.provider.client.Accounts.UpdateProfile(params)
+	_req, _ := http.NewRequest("POST", urlLocation, nil)
 
-	if err != nil {
+	_res, _ := r.provider.httpClient.Do(_req)
+
+	if _res.StatusCode != 200 {
 		resp.Diagnostics.AddError(
-			"Could not delete profile information",
-			fmt.Sprintf("Unable to delete profile information, got error: %s", err),
+			"Could not delete profile",
+			fmt.Sprintf("Unable to delete profile, got error %s", _res.Status),
 		)
 		return
 	}
-
-	resp.Diagnostics.AddWarning(
-		"Profile information can't deleted",
-		"Profile information can't be deleted through the API, so it will be reset to default values.",
-	)
 
 	resp.State.RemoveResource(ctx)
 }
