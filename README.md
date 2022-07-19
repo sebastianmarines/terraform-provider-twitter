@@ -19,7 +19,7 @@ First install the provider and run `terraform init` to download it
 terraform {
   required_providers {
     twitter = {
-      source  = "hashicorp.com/local/twitter"
+      source  = "sebastianmarines/twitter"
       version = "~> 0.1.0"
     }
   }
