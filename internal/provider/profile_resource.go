@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/validators"
 )
 
 var _ tfsdk.ResourceType = profileResourceType{}
@@ -36,6 +37,9 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				MarkdownDescription: "Full name associated with the profile.",
 				Type:                types.StringType,
 				Optional:            true,
+				Validators: []tfsdk.AttributeValidator{
+					validators.BlankName(),
+				},
 			},
 			"url": {
 				MarkdownDescription: "URL associated with the profile.",
