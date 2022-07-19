@@ -24,7 +24,7 @@ data "twitter_user" "rick" {
 
 ### Optional
 
-- `id` (Number) Tweet id
+- `id` (Number) The integer representation of the unique identifier for this User.
 - `screen_name` (String) The screen name, handle, or alias that this user identifies themselves with.
 
 ### Read-Only

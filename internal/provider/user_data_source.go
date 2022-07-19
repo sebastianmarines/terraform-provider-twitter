@@ -22,7 +22,7 @@ func (t userDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
-				MarkdownDescription: "Tweet id",
+				MarkdownDescription: "The integer representation of the unique identifier for this User.",
 				Type:                types.Int64Type,
 				Optional:            true,
 			},
