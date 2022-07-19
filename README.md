@@ -1,6 +1,7 @@
 # Terraform Provider for Twitter
 
 Website: [registry.terraform.io/providers/sebastianmarines/twitter/latest](https://registry.terraform.io/providers/sebastianmarines/twitter/latest)
+
 Documentation: [registry.terraform.io/providers/sebastianmarines/twitter/latest/docs](https://registry.terraform.io/providers/sebastianmarines/twitter/latest/docs)
 
 ## Requirements
