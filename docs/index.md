@@ -3,12 +3,12 @@
 page_title: "twitter Provider"
 subcategory: ""
 description: |-
-  
+  Terraform provider for Twitter
 ---
 
 # twitter Provider
 
-
+Terraform provider for Twitter
 
 ## Example Usage
 
