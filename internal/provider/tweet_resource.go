@@ -22,12 +22,12 @@ func (t tweetResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
-				MarkdownDescription: "Tweet id",
+				MarkdownDescription: "The integer representation of the unique identifier for this Tweet.",
 				Type:                types.Int64Type,
 				Computed:            true,
 			},
 			"text": {
-				MarkdownDescription: "Tweet text",
+				MarkdownDescription: "The actual UTF-8 text of the status update. Should not exceed 280 characters.",
 				Type:                types.StringType,
 				Required:            true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -38,8 +38,58 @@ func (t tweetResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				},
 			},
 			"user_id": {
-				MarkdownDescription: "Tweet user id",
+				MarkdownDescription: "The integer representation of the unique identifier for the user who posted this Tweet.",
 				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"source": {
+				MarkdownDescription: "Utility used to post the Tweet, as an HTML-formatted string. ",
+				Type:                types.StringType,
+				Computed:            true,
+			},
+			"in_reply_to_status_id": {
+				MarkdownDescription: "If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet’s ID.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"in_reply_to_user_id": {
+				MarkdownDescription: "If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet’s author ID.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"quoted_status_id": {
+				MarkdownDescription: "This field only surfaces when the Tweet is a quote Tweet. This field contains the integer value Tweet ID of the quoted Tweet.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"quote_count": {
+				MarkdownDescription: "Indicates approximately how many times this Tweet has been quoted by Twitter users.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"reply_count": {
+				MarkdownDescription: "Number of times this Tweet has been replied to.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"retweet_count": {
+				MarkdownDescription: "Number of times this Tweet has been retweeted.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"favorite_count": {
+				MarkdownDescription: "Indicates approximately how many times this Tweet has been liked by Twitter users.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
+			"possibly_sensitive": {
+				MarkdownDescription: "An indicator that the URL contained in the Tweet may contain content or media identified as sensitive content.",
+				Type:                types.BoolType,
+				Computed:            true,
+			},
+			"lang": {
+				MarkdownDescription: "When present, indicates a BCP 47 language identifier corresponding to the machine-detected language of the Tweet text, or und if no language could be detected.",
+				Type:                types.StringType,
 				Computed:            true,
 			},
 		},
@@ -55,9 +105,19 @@ func (t tweetResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (
 }
 
 type tweetResourceData struct {
-	ID     types.Int64  `tfsdk:"id"`
-	Text   types.String `tfsdk:"text"`
-	UserID types.Int64  `tfsdk:"user_id"`
+	ID                types.Int64  `tfsdk:"id"`
+	Text              types.String `tfsdk:"text"`
+	UserID            types.Int64  `tfsdk:"user_id"`
+	Source            types.String `tfsdk:"source"`
+	InReplyToStatusID types.Int64  `tfsdk:"in_reply_to_status_id"`
+	InReplyToUserID   types.Int64  `tfsdk:"in_reply_to_user_id"`
+	QuotedStatusID    types.Int64  `tfsdk:"quoted_status_id"`
+	QuoteCount        types.Int64  `tfsdk:"quote_count"`
+	ReplyCount        types.Int64  `tfsdk:"reply_count"`
+	RetweetCount      types.Int64  `tfsdk:"retweet_count"`
+	FavoriteCount     types.Int64  `tfsdk:"favorite_count"`
+	PossiblySensitive types.Bool   `tfsdk:"possibly_sensitive"`
+	Lang              types.String `tfsdk:"lang"`
 }
 
 type tweetResource struct {
@@ -92,6 +152,16 @@ func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 	data.ID = types.Int64{Value: tweet.ID}
 	data.Text = types.String{Value: tweet.Text}
 	data.UserID = types.Int64{Value: tweet.User.ID}
+	data.Source = types.String{Value: tweet.Source}
+	data.InReplyToStatusID = types.Int64{Value: tweet.InReplyToStatusID}
+	data.InReplyToUserID = types.Int64{Value: tweet.InReplyToUserID}
+	data.QuotedStatusID = types.Int64{Value: tweet.QuotedStatusID}
+	data.QuoteCount = types.Int64{Value: int64(tweet.QuoteCount)}
+	data.ReplyCount = types.Int64{Value: int64(tweet.ReplyCount)}
+	data.RetweetCount = types.Int64{Value: int64(tweet.RetweetCount)}
+	data.FavoriteCount = types.Int64{Value: int64(tweet.FavoriteCount)}
+	data.PossiblySensitive = types.Bool{Value: tweet.PossiblySensitive}
+	data.Lang = types.String{Value: tweet.Lang}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

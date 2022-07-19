@@ -23,11 +23,21 @@ resource "twitter_tweet" "tweet" {
 
 ### Required
 
-- `text` (String) Tweet text
+- `text` (String) The actual UTF-8 text of the status update. Should not exceed 280 characters.
 
 ### Read-Only
 
-- `id` (Number) Tweet id
-- `user_id` (Number) Tweet user id
+- `favorite_count` (Number) Indicates approximately how many times this Tweet has been liked by Twitter users.
+- `id` (Number) The integer representation of the unique identifier for this Tweet.
+- `in_reply_to_status_id` (Number) If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet’s ID.
+- `in_reply_to_user_id` (Number) If the represented Tweet is a reply, this field will contain the integer representation of the original Tweet’s author ID.
+- `lang` (String) When present, indicates a BCP 47 language identifier corresponding to the machine-detected language of the Tweet text, or und if no language could be detected.
+- `possibly_sensitive` (Boolean) An indicator that the URL contained in the Tweet may contain content or media identified as sensitive content.
+- `quote_count` (Number) Indicates approximately how many times this Tweet has been quoted by Twitter users.
+- `quoted_status_id` (Number) This field only surfaces when the Tweet is a quote Tweet. This field contains the integer value Tweet ID of the quoted Tweet.
+- `reply_count` (Number) Number of times this Tweet has been replied to.
+- `retweet_count` (Number) Number of times this Tweet has been retweeted.
+- `source` (String) Utility used to post the Tweet, as an HTML-formatted string.
+- `user_id` (Number) The integer representation of the unique identifier for the user who posted this Tweet.
 
 
