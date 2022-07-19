@@ -166,7 +166,7 @@ func (d userDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 		params.ScreenName = data.ScreenName.Value
 	}
 
-	tweet, _, err := d.provider.client.Users.Show(params)
+	user, _, err := d.provider.client.Users.Show(params)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -176,22 +176,22 @@ func (d userDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 		return
 	}
 
-	data.ID = types.Int64{Value: tweet.ID}
-	data.ScreenName = types.String{Value: tweet.ScreenName}
-	data.Name = types.String{Value: tweet.Name}
-	data.Location = types.String{Value: tweet.Location}
-	data.URL = types.String{Value: tweet.URL}
-	data.Description = types.String{Value: tweet.Description}
-	data.Protected = types.Bool{Value: tweet.Protected}
-	data.Verified = types.Bool{Value: tweet.Verified}
-	data.Followers = types.Int64{Value: int64(tweet.FollowersCount)}
-	data.Friends = types.Int64{Value: int64(tweet.FriendsCount)}
-	data.Statuses = types.Int64{Value: int64(tweet.StatusesCount)}
-	data.Favorites = types.Int64{Value: int64(tweet.FavouritesCount)}
-	data.ProfileBannerURL = types.String{Value: tweet.ProfileBannerURL}
-	data.ProfileImageURLHttps = types.String{Value: tweet.ProfileImageURLHttps}
-	data.DefaultProfile = types.Bool{Value: tweet.DefaultProfile}
-	data.DefaultProfileImage = types.Bool{Value: tweet.DefaultProfileImage}
+	data.ID = types.Int64{Value: user.ID}
+	data.ScreenName = types.String{Value: user.ScreenName}
+	data.Name = types.String{Value: user.Name}
+	data.Location = types.String{Value: user.Location}
+	data.URL = types.String{Value: user.URL}
+	data.Description = types.String{Value: user.Description}
+	data.Protected = types.Bool{Value: user.Protected}
+	data.Verified = types.Bool{Value: user.Verified}
+	data.Followers = types.Int64{Value: int64(user.FollowersCount)}
+	data.Friends = types.Int64{Value: int64(user.FriendsCount)}
+	data.Statuses = types.Int64{Value: int64(user.StatusesCount)}
+	data.Favorites = types.Int64{Value: int64(user.FavouritesCount)}
+	data.ProfileBannerURL = types.String{Value: user.ProfileBannerURL}
+	data.ProfileImageURLHttps = types.String{Value: user.ProfileImageURLHttps}
+	data.DefaultProfile = types.Bool{Value: user.DefaultProfile}
+	data.DefaultProfileImage = types.Bool{Value: user.DefaultProfileImage}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
