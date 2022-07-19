@@ -3,12 +3,24 @@
 page_title: "twitter Provider"
 subcategory: ""
 description: |-
-  Terraform provider for Twitter
+  The Twitter provider allows you to access the Twitter API.
+  To configure the provider, you must set the required variables in the provider configuration or provide the following environment variables:
+  TWITTERAPIKEYTWITTERAPISECRET_KEYTWITTERACCESSTOKENTWITTERACCESSTOKEN_SECRET
+  In order to get the required keys go to https://developer.twitter.com/ and apply for a developer account
 ---
 
 # twitter Provider
 
-Terraform provider for Twitter
+The Twitter provider allows you to access the Twitter API.
+
+To configure the provider, you must set the required variables in the provider configuration or provide the following environment variables:
+
+- TWITTER_API_KEY
+- TWITTER_API_SECRET_KEY
+- TWITTER_ACCESS_TOKEN
+- TWITTER_ACCESS_TOKEN_SECRET
+
+> In order to get the required keys go to https://developer.twitter.com/ and apply for a developer account
 
 ## Example Usage
 

@@ -175,7 +175,18 @@ func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSou
 
 func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Terraform provider for Twitter",
+		MarkdownDescription: `
+The Twitter provider allows you to access the Twitter API.
+
+To configure the provider, you must set the required variables in the provider configuration or provide the following environment variables:
+
+- TWITTER_API_KEY
+- TWITTER_API_SECRET_KEY
+- TWITTER_ACCESS_TOKEN
+- TWITTER_ACCESS_TOKEN_SECRET
+
+> In order to get the required keys go to https://developer.twitter.com/ and apply for a developer account
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"api_key": {
 				MarkdownDescription: "Twitter API key",
