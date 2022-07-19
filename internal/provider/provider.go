@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -22,7 +23,8 @@ type provider struct {
 	// communicate with the upstream service. Resource and DataSource
 	// implementations can then make calls using this client.
 	//
-	client twitter.Client
+	client     twitter.Client
+	httpClient http.Client
 
 	// configured is set to true at the end of the Configure method.
 	// This can be used in Resource and DataSource implementations to verify
@@ -152,13 +154,15 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	client := twitter.NewClient(httpClient)
 
 	p.client = *client
+	p.httpClient = *httpClient
 
 	p.configured = true
 }
 
 func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceType, diag.Diagnostics) {
 	return map[string]tfsdk.ResourceType{
-		"twitter_tweet": tweetResourceType{},
+		"twitter_tweet":   tweetResourceType{},
+		"twitter_profile": profileResourceType{},
 	}, nil
 }
 

@@ -2,7 +2,11 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -144,7 +148,7 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 		return
 	}
 
-	data.ID = types.Int64{Value: user.ID}
+	// data.ID = types.Int64{Value: user.ID}
 	data.Name = types.String{Value: user.Name}
 	data.URL = types.String{Value: user.URL}
 	data.Location = types.String{Value: user.Location}
@@ -164,51 +168,31 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		return
 	}
 
-	params := &twitter.AccountUpdateProfileParams{}
+	urlLocation := "https://api.twitter.com/1.1/account/update_profile.json?name=%s&url=%s&location=%s&description=%s"
 
-	if !data.Name.Null {
-		params.Name = data.Name.Value
-	}
+	urlLocation = fmt.Sprintf(urlLocation, url.QueryEscape(data.Name.Value), url.QueryEscape(data.URL.Value), url.QueryEscape(data.Location.Value), url.QueryEscape(data.Description.Value))
 
-	if !data.URL.Null {
-		params.URL = data.URL.Value
-	}
+	_req, _ := http.NewRequest("POST", urlLocation, nil)
 
-	if !data.Location.Null {
-		params.Location = data.Location.Value
-	}
+	_res, _ := r.provider.httpClient.Do(_req)
 
-	if !data.Description.Null {
-		params.Description = data.Description.Value
-	}
-
-	user, _, err := r.provider.client.Accounts.UpdateProfile(params)
-
-	if err != nil {
+	if _res.StatusCode != 200 {
 		resp.Diagnostics.AddError(
 			"Could not update profile",
-			fmt.Sprintf("Unable to update profile, got error %s", err.Error()),
+			fmt.Sprintf("Unable to update profile, got error %s", _res.Status),
 		)
 		return
 	}
 
-	data.ID = types.Int64{Value: user.ID}
+	defer _res.Body.Close()
 
-	if !data.Name.Null {
-		data.Name = types.String{Value: user.Name}
-	}
+	body, _ := ioutil.ReadAll(_res.Body)
 
-	// if !data.URL.Null {
-	// 	data.URL = types.String{Value: user.URL}
-	// }
+	profile := &profileHTTPResponse{}
 
-	if !data.Location.Null {
-		data.Location = types.String{Value: user.Location}
-	}
+	_ = json.Unmarshal(body, profile)
 
-	if !data.Description.Null {
-		data.Description = types.String{Value: user.Description}
-	}
+	data.ID = types.Int64{Value: profile.ID}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -246,4 +230,8 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 	)
 
 	resp.State.RemoveResource(ctx)
+}
+
+type profileHTTPResponse struct {
+	ID int64 `json:"id"`
 }
