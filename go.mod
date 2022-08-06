@@ -1,6 +1,6 @@
 module github.com/sebastianmarines/terraform-provider-twitter
 
-go 1.17
+go 1.18
 
 require (
 	github.com/dghubble/go-twitter v0.0.0-20220716041154-837915ec2f79
