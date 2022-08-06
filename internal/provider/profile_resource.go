@@ -2,11 +2,10 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -37,6 +36,7 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				MarkdownDescription: "Full name associated with the profile.",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 				Validators: []tfsdk.AttributeValidator{
 					validators.BlankName(),
 				},
@@ -45,16 +45,19 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				MarkdownDescription: "URL associated with the profile.",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"location": {
 				MarkdownDescription: "The city or country describing where the user of the account is located. The contents are not normalized or geocoded in any way.",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"description": {
 				MarkdownDescription: "A description of the user owning the account.",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 		},
 	}, nil
@@ -83,7 +86,7 @@ type profileResource struct {
 func (t profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	var data profileResourceData
 
-	diags := req.Config.Get(ctx, &data)
+	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -118,13 +121,15 @@ func (t profileResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		return
 	}
 
-	data.ID = types.Int64{Value: user.ID}
-
-	if !data.Name.Null {
-		data.Name = types.String{Value: user.Name}
+	profile := &profileResourceData{
+		ID:          types.Int64{Value: user.ID},
+		Name:        types.String{Value: user.Name},
+		URL:         types.String{Value: getProfileUrl(user.URL, data.URL.Value)},
+		Location:    types.String{Value: user.Location},
+		Description: types.String{Value: user.Description},
 	}
 
-	diags = resp.State.Set(ctx, &data)
+	diags = resp.State.Set(ctx, &profile)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -152,19 +157,22 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 		return
 	}
 
-	data.Name.Value = user.Name
-	data.URL.Value = user.URL
-	data.Location.Value = user.Location
-	data.Description.Value = user.Description
+	profile := &profileResourceData{
+		ID:          types.Int64{Value: user.ID},
+		Name:        types.String{Value: user.Name},
+		URL:         types.String{Value: getProfileUrl(user.URL, data.URL.Value)},
+		Location:    types.String{Value: user.Location},
+		Description: types.String{Value: user.Description},
+	}
 
-	diags = resp.State.Set(ctx, &data)
+	diags = resp.State.Set(ctx, &profile)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
 	var data profileResourceData
 
-	diags := req.Config.Get(ctx, &data)
+	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -187,17 +195,29 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		return
 	}
 
-	defer _res.Body.Close()
+	params := &twitter.UserShowParams{
+		UserID: data.ID.Value,
+	}
 
-	body, _ := ioutil.ReadAll(_res.Body)
+	user, _, err := r.provider.client.Users.Show(params)
 
-	profile := &profileHTTPResponse{}
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Could not read user",
+			fmt.Sprintf("Unable to read user, got error: %s", err),
+		)
+		return
+	}
 
-	_ = json.Unmarshal(body, profile)
+	profile := &profileResourceData{
+		ID:          types.Int64{Value: user.ID},
+		Name:        types.String{Value: user.Name},
+		URL:         types.String{Value: getProfileUrl(user.URL, data.URL.Value)},
+		Location:    types.String{Value: user.Location},
+		Description: types.String{Value: user.Description},
+	}
 
-	data.ID = types.Int64{Value: profile.ID}
-
-	diags = resp.State.Set(ctx, &data)
+	diags = resp.State.Set(ctx, &profile)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -230,4 +250,30 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 
 type profileHTTPResponse struct {
 	ID int64 `json:"id"`
+}
+
+func getProfileUrl(url string, originalUrl string) string {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	res, err := client.Get(url)
+
+	if err != nil {
+		return ""
+	}
+
+	if res.StatusCode != 301 {
+		return url
+	}
+
+	redirectUrl := res.Header.Get("Location")
+
+	if strings.HasPrefix(redirectUrl, originalUrl) {
+		return originalUrl
+	} else {
+		return redirectUrl
+	}
 }
