@@ -23,6 +23,11 @@ func (t followResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 		MarkdownDescription: "Allows the authenticating user to follow (friend) a user.",
 
 		Attributes: map[string]tfsdk.Attribute{
+			"id": {
+				MarkdownDescription: "The ID of the user being followed.",
+				Type:                types.Int64Type,
+				Computed:            true,
+			},
 			"screen_name": {
 				MarkdownDescription: "The screen name of the user being followed.",
 				Type:                types.StringType,
@@ -59,6 +64,7 @@ func (t followResourceType) NewResource(ctx context.Context, in tfsdk.Provider) 
 }
 
 type followResourceData struct {
+	ID         types.Int64  `tfsdk:"id"`
 	ScreenName types.String `tfsdk:"screen_name"`
 	UserId     types.Int64  `tfsdk:"user_id"`
 	Pending    types.Bool   `tfsdk:"pending"`
@@ -117,6 +123,7 @@ func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 	follow.Pending.Value = user.FollowRequestSent
 	follow.ScreenName.Value = user.ScreenName
 	follow.UserId.Value = user.ID
+	follow.ID.Value = user.ID
 
 	diags = resp.State.Set(ctx, follow)
 	resp.Diagnostics.Append(diags...)
@@ -165,6 +172,7 @@ func (r followResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
 	follow.Pending.Value = user.FollowRequestSent
 	follow.ScreenName.Value = user.ScreenName
 	follow.UserId.Value = user.ID
+	follow.ID.Value = user.ID
 
 	diags = resp.State.Set(ctx, &follow)
 	resp.Diagnostics.Append(diags...)
