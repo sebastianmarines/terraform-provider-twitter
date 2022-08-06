@@ -149,19 +149,19 @@ func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 		return
 	}
 
-	data.ID = types.Int64{Value: tweet.ID}
-	data.Text = types.String{Value: tweet.Text}
-	data.UserID = types.Int64{Value: tweet.User.ID}
-	data.Source = types.String{Value: tweet.Source}
-	data.InReplyToStatusID = types.Int64{Value: tweet.InReplyToStatusID}
-	data.InReplyToUserID = types.Int64{Value: tweet.InReplyToUserID}
-	data.QuotedStatusID = types.Int64{Value: tweet.QuotedStatusID}
-	data.QuoteCount = types.Int64{Value: int64(tweet.QuoteCount)}
-	data.ReplyCount = types.Int64{Value: int64(tweet.ReplyCount)}
-	data.RetweetCount = types.Int64{Value: int64(tweet.RetweetCount)}
-	data.FavoriteCount = types.Int64{Value: int64(tweet.FavoriteCount)}
-	data.PossiblySensitive = types.Bool{Value: tweet.PossiblySensitive}
-	data.Lang = types.String{Value: tweet.Lang}
+	data.ID.Value = tweet.ID
+	data.Text.Value = tweet.Text
+	data.UserID.Value = tweet.User.ID
+	data.Source.Value = tweet.Source
+	data.InReplyToStatusID.Value = tweet.InReplyToStatusID
+	data.InReplyToUserID.Value = tweet.InReplyToUserID
+	data.QuotedStatusID.Value = tweet.QuotedStatusID
+	data.QuoteCount.Value = int64(tweet.QuoteCount)
+	data.ReplyCount.Value = int64(tweet.ReplyCount)
+	data.RetweetCount.Value = int64(tweet.RetweetCount)
+	data.FavoriteCount.Value = int64(tweet.FavoriteCount)
+	data.PossiblySensitive.Value = tweet.PossiblySensitive
+	data.Lang.Value = tweet.Lang
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -199,9 +199,9 @@ func (r tweetResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 		}
 	}
 
-	data.ID = types.Int64{Value: tweet.ID}
-	data.Text = types.String{Value: tweet.Text}
-	data.UserID = types.Int64{Value: tweet.User.ID}
+	data.ID.Value = tweet.ID
+	data.Text.Value = tweet.Text
+	data.UserID.Value = tweet.User.ID
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

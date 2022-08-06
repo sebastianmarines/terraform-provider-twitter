@@ -152,11 +152,10 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 		return
 	}
 
-	// data.ID = types.Int64{Value: user.ID}
-	data.Name = types.String{Value: user.Name}
-	data.URL = types.String{Value: user.URL}
-	data.Location = types.String{Value: user.Location}
-	data.Description = types.String{Value: user.Description}
+	data.Name.Value = user.Name
+	data.URL.Value = user.URL
+	data.Location.Value = user.Location
+	data.Description.Value = user.Description
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

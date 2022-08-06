@@ -176,22 +176,22 @@ func (d userDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 		return
 	}
 
-	data.ID = types.Int64{Value: user.ID}
-	data.ScreenName = types.String{Value: user.ScreenName}
-	data.Name = types.String{Value: user.Name}
-	data.Location = types.String{Value: user.Location}
-	data.URL = types.String{Value: user.URL}
-	data.Description = types.String{Value: user.Description}
-	data.Protected = types.Bool{Value: user.Protected}
-	data.Verified = types.Bool{Value: user.Verified}
-	data.Followers = types.Int64{Value: int64(user.FollowersCount)}
-	data.Friends = types.Int64{Value: int64(user.FriendsCount)}
-	data.Statuses = types.Int64{Value: int64(user.StatusesCount)}
-	data.Favorites = types.Int64{Value: int64(user.FavouritesCount)}
-	data.ProfileBannerURL = types.String{Value: user.ProfileBannerURL}
-	data.ProfileImageURLHttps = types.String{Value: user.ProfileImageURLHttps}
-	data.DefaultProfile = types.Bool{Value: user.DefaultProfile}
-	data.DefaultProfileImage = types.Bool{Value: user.DefaultProfileImage}
+	data.ID.Value = user.ID
+	data.ScreenName.Value = user.ScreenName
+	data.Name.Value = user.Name
+	data.Location.Value = user.Location
+	data.URL.Value = user.URL
+	data.Description.Value = user.Description
+	data.Protected.Value = user.Protected
+	data.Verified.Value = user.Verified
+	data.Followers.Value = int64(user.FollowersCount)
+	data.Friends.Value = int64(user.FriendsCount)
+	data.Statuses.Value = int64(user.StatusesCount)
+	data.Favorites.Value = int64(user.FavouritesCount)
+	data.ProfileBannerURL.Value = user.ProfileBannerURL
+	data.ProfileImageURLHttps.Value = user.ProfileImageURLHttps
+	data.DefaultProfile.Value = user.DefaultProfile
+	data.DefaultProfileImage.Value = user.DefaultProfileImage
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
