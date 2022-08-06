@@ -127,7 +127,7 @@ type tweetResource struct {
 func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	var data tweetResourceData
 
-	diags := req.Config.Get(ctx, &data)
+	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -149,21 +149,23 @@ func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 		return
 	}
 
-	data.ID.Value = tweet.ID
-	data.Text.Value = tweet.Text
-	data.UserID.Value = tweet.User.ID
-	data.Source.Value = tweet.Source
-	data.InReplyToStatusID.Value = tweet.InReplyToStatusID
-	data.InReplyToUserID.Value = tweet.InReplyToUserID
-	data.QuotedStatusID.Value = tweet.QuotedStatusID
-	data.QuoteCount.Value = int64(tweet.QuoteCount)
-	data.ReplyCount.Value = int64(tweet.ReplyCount)
-	data.RetweetCount.Value = int64(tweet.RetweetCount)
-	data.FavoriteCount.Value = int64(tweet.FavoriteCount)
-	data.PossiblySensitive.Value = tweet.PossiblySensitive
-	data.Lang.Value = tweet.Lang
+	newTweet := &tweetResourceData{}
 
-	diags = resp.State.Set(ctx, &data)
+	newTweet.ID.Value = tweet.ID
+	newTweet.Text.Value = tweet.Text
+	newTweet.UserID.Value = tweet.User.ID
+	newTweet.Source.Value = tweet.Source
+	newTweet.InReplyToStatusID.Value = tweet.InReplyToStatusID
+	newTweet.InReplyToUserID.Value = tweet.InReplyToUserID
+	newTweet.QuotedStatusID.Value = tweet.QuotedStatusID
+	newTweet.QuoteCount.Value = int64(tweet.QuoteCount)
+	newTweet.ReplyCount.Value = int64(tweet.ReplyCount)
+	newTweet.RetweetCount.Value = int64(tweet.RetweetCount)
+	newTweet.FavoriteCount.Value = int64(tweet.FavoriteCount)
+	newTweet.PossiblySensitive.Value = tweet.PossiblySensitive
+	newTweet.Lang.Value = tweet.Lang
+
+	diags = resp.State.Set(ctx, &newTweet)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -199,11 +201,23 @@ func (r tweetResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 		}
 	}
 
-	data.ID.Value = tweet.ID
-	data.Text.Value = tweet.Text
-	data.UserID.Value = tweet.User.ID
+	newTweet := &tweetResourceData{}
 
-	diags = resp.State.Set(ctx, &data)
+	newTweet.ID.Value = tweet.ID
+	newTweet.Text.Value = tweet.Text
+	newTweet.UserID.Value = tweet.User.ID
+	newTweet.Source.Value = tweet.Source
+	newTweet.InReplyToStatusID.Value = tweet.InReplyToStatusID
+	newTweet.InReplyToUserID.Value = tweet.InReplyToUserID
+	newTweet.QuotedStatusID.Value = tweet.QuotedStatusID
+	newTweet.QuoteCount.Value = int64(tweet.QuoteCount)
+	newTweet.ReplyCount.Value = int64(tweet.ReplyCount)
+	newTweet.RetweetCount.Value = int64(tweet.RetweetCount)
+	newTweet.FavoriteCount.Value = int64(tweet.FavoriteCount)
+	newTweet.PossiblySensitive.Value = tweet.PossiblySensitive
+	newTweet.Lang.Value = tweet.Lang
+
+	diags = resp.State.Set(ctx, &newTweet)
 	resp.Diagnostics.Append(diags...)
 }
 
