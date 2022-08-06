@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/utils"
 )
 
 var _ tfsdk.ResourceType = profileResourceType{}
@@ -68,6 +69,12 @@ type followResource struct {
 }
 
 func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, t.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data followResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -116,6 +123,11 @@ func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 }
 
 func (r followResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data followResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -167,6 +179,11 @@ func (r followResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 }
 
 func (r followResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data followResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -185,7 +202,7 @@ func (r followResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequ
 		params.UserID = data.UserId.Value
 	}
 
-	_, _, err := r.provider.client.Friendships.Destroy(params)
+	_, _, err = r.provider.client.Friendships.Destroy(params)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
