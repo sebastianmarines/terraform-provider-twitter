@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -12,11 +13,20 @@ import (
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"scaffolding": providerserver.NewProtocol6WithError(New("test")()),
+	"twitter": providerserver.NewProtocol6WithError(New("twitter")()),
 }
 
 func testAccPreCheck(t *testing.T) {
-	// You can add code here to run prior to any test case execution, for example assertions
-	// about the appropriate environment variables being set are common to see in a pre-check
-	// function.
+	if v := os.Getenv("TWITTER_API_KEY"); v == "" {
+		t.Error("Missing Twitter API key")
+	}
+	if v := os.Getenv("TWITTER_API_SECRET_KEY"); v == "" {
+		t.Error("Missing Twitter API secret key")
+	}
+	if v := os.Getenv("TWITTER_ACCESS_TOKEN"); v == "" {
+		t.Error("Missing Twitter access token")
+	}
+	if v := os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"); v == "" {
+		t.Error("Missing Twitter access secret")
+	}
 }
