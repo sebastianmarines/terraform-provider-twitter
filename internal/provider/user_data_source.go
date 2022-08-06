@@ -25,11 +25,13 @@ func (t userDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				MarkdownDescription: "The integer representation of the unique identifier for this User.",
 				Type:                types.Int64Type,
 				Optional:            true,
+				Computed:            true,
 			},
 			"screen_name": {
 				MarkdownDescription: "The screen name, handle, or alias that this user identifies themselves with.",
 				Type:                types.StringType,
 				Optional:            true,
+				Computed:            true,
 			},
 			"name": {
 				MarkdownDescription: "The name of the user, as they’ve defined it.",
@@ -176,24 +178,26 @@ func (d userDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 		return
 	}
 
-	data.ID.Value = user.ID
-	data.ScreenName.Value = user.ScreenName
-	data.Name.Value = user.Name
-	data.Location.Value = user.Location
-	data.URL.Value = user.URL
-	data.Description.Value = user.Description
-	data.Protected.Value = user.Protected
-	data.Verified.Value = user.Verified
-	data.Followers.Value = int64(user.FollowersCount)
-	data.Friends.Value = int64(user.FriendsCount)
-	data.Statuses.Value = int64(user.StatusesCount)
-	data.Favorites.Value = int64(user.FavouritesCount)
-	data.ProfileBannerURL.Value = user.ProfileBannerURL
-	data.ProfileImageURLHttps.Value = user.ProfileImageURLHttps
-	data.DefaultProfile.Value = user.DefaultProfile
-	data.DefaultProfileImage.Value = user.DefaultProfileImage
+	newUser := &userDataSourceData{}
 
-	diags = resp.State.Set(ctx, &data)
+	newUser.ID.Value = user.ID
+	newUser.ScreenName.Value = user.ScreenName
+	newUser.Name.Value = user.Name
+	newUser.Location.Value = user.Location
+	newUser.URL.Value = user.URL
+	newUser.Description.Value = user.Description
+	newUser.Protected.Value = user.Protected
+	newUser.Verified.Value = user.Verified
+	newUser.Followers.Value = int64(user.FollowersCount)
+	newUser.Friends.Value = int64(user.FriendsCount)
+	newUser.Statuses.Value = int64(user.StatusesCount)
+	newUser.Favorites.Value = int64(user.FavouritesCount)
+	newUser.ProfileBannerURL.Value = user.ProfileBannerURL
+	newUser.ProfileImageURLHttps.Value = user.ProfileImageURLHttps
+	newUser.DefaultProfile.Value = user.DefaultProfile
+	newUser.DefaultProfileImage.Value = user.DefaultProfileImage
+
+	diags = resp.State.Set(ctx, &newUser)
 	resp.Diagnostics.Append(diags...)
 
 }
