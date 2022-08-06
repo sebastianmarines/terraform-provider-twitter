@@ -163,6 +163,7 @@ func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceT
 	return map[string]tfsdk.ResourceType{
 		"twitter_tweet":   tweetResourceType{},
 		"twitter_profile": profileResourceType{},
+		"twitter_follow":  followResourceType{},
 	}, nil
 }
 
