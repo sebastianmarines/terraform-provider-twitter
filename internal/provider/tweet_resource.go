@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/utils"
 	"github.com/sebastianmarines/terraform-provider-twitter/internal/validators"
 )
 
@@ -125,6 +126,11 @@ type tweetResource struct {
 }
 
 func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, t.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data tweetResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -170,6 +176,11 @@ func (t tweetResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 }
 
 func (r tweetResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data tweetResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -230,6 +241,11 @@ func (r tweetResource) Update(ctx context.Context, req tfsdk.UpdateResourceReque
 }
 
 func (r tweetResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data tweetResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -243,7 +259,7 @@ func (r tweetResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReque
 		TrimUser: twitter.Bool(true),
 	}
 
-	_, _, err := r.provider.client.Statuses.Destroy(data.ID.Value, params)
+	_, _, err = r.provider.client.Statuses.Destroy(data.ID.Value, params)
 
 	if err != nil {
 		resp.Diagnostics.AddError(

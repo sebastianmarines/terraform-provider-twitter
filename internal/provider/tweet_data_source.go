@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/utils"
 )
 
 var _ tfsdk.DataSourceType = tweetDataSourceType{}
@@ -119,6 +120,11 @@ type tweetDataSource struct {
 }
 
 func (d tweetDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, d.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data tweetDataSourceData
 
 	diags := req.Config.Get(ctx, &data)

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/sebastianmarines/terraform-provider-twitter/internal/utils"
 	"github.com/sebastianmarines/terraform-provider-twitter/internal/validators"
 )
 
@@ -84,6 +85,11 @@ type profileResource struct {
 }
 
 func (t profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, t.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data profileResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -134,6 +140,11 @@ func (t profileResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 }
 
 func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data profileResourceData
 
 	diags := req.State.Get(ctx, &data)
@@ -170,6 +181,11 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 }
 
 func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data profileResourceData
 
 	diags := req.Plan.Get(ctx, &data)
@@ -222,6 +238,11 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 }
 
 func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
 	var data profileResourceData
 
 	diags := req.State.Get(ctx, &data)
