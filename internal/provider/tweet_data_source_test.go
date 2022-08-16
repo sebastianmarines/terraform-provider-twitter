@@ -16,20 +16,20 @@ func TestAccTweetDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceConfig(1559537820804399104),
+				Config: testAccTweetDataSourceConfig(1559537820804399104),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.twitter_tweet.acc", "text", "Hello World!"),
 				),
 			},
 			{
-				Config:      testAccDataSourceConfig(1),
+				Config:      testAccTweetDataSourceConfig(1),
 				ExpectError: regexp.MustCompile("Unable to read tweet, got error: .+"),
 			},
 		},
 	})
 }
 
-func testAccDataSourceConfig(id int64) string {
+func testAccTweetDataSourceConfig(id int64) string {
 	return fmt.Sprintf(`
 data "twitter_tweet" "acc" {
   id = %[1]q
