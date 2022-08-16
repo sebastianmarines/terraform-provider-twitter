@@ -37,4 +37,4 @@ testacc:
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
 
 testaccdev:
-	TF_ACC=1 gotestsum $(TEST) -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 gotestsum --format testname $(TEST) -v $(TESTARGS) -timeout 120m
