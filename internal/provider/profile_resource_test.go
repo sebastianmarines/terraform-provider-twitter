@@ -12,17 +12,22 @@ import (
 
 func TestAccProfileResource(t *testing.T) {
 	accName := rand.String(5)
+	desc := rand.String(20)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Update profile
 			{
-				Config: testAccProfileResourceConfig(accName, "", "", ""),
-				Check:  resource.TestCheckResourceAttr("twitter_profile.acc", "name", accName),
+				Config: testAccProfileResourceConfig(accName, "", "Goland", desc),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("twitter_profile.acc", "name", accName),
+					resource.TestCheckResourceAttr("twitter_profile.acc", "url", ""),
+					resource.TestCheckResourceAttr("twitter_profile.acc", "location", "Goland"),
+					resource.TestCheckResourceAttr("twitter_profile.acc", "description", desc),
+				),
 			},
-			// Fail when setting `name` to null
-			// Keep same URL
 		},
 	})
 }
