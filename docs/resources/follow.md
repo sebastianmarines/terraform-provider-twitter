@@ -28,6 +28,6 @@ resource "twitter_follow" "test" {
 
 ### Read-Only
 
-- `pending` (Boolean) Whether the authenticated user is pending approval to follow the user.
+- `id` (Number) The ID of the user being followed.
 
 
