@@ -39,6 +39,12 @@ func TestAccProfileResourceValidators(t *testing.T) {
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("The URL is not a valid URL"),
 			},
+			// Non blank name
+			{
+				Config:      testAccProfileResourceConfig("", "", "", ""),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("Name can't be blank"),
+			},
 		},
 	})
 }
