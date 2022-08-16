@@ -46,11 +46,6 @@ func (t followResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 					tfsdk.RequiresReplace(),
 				},
 			},
-			"pending": {
-				MarkdownDescription: "Whether the authenticated user is pending approval to follow the user.",
-				Type:                types.BoolType,
-				Computed:            true,
-			},
 		},
 	}, nil
 }
@@ -67,7 +62,6 @@ type followResourceData struct {
 	ID         types.Int64  `tfsdk:"id"`
 	ScreenName types.String `tfsdk:"screen_name"`
 	UserId     types.Int64  `tfsdk:"user_id"`
-	Pending    types.Bool   `tfsdk:"pending"`
 }
 
 type followResource struct {
@@ -141,7 +135,6 @@ func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 	}
 
 	follow := &followResourceData{}
-	follow.Pending.Value = user.FollowRequestSent
 	follow.ScreenName.Value = user.ScreenName
 	follow.UserId.Value = user.ID
 	follow.ID.Value = user.ID
@@ -190,7 +183,6 @@ func (r followResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
 	}
 
 	follow := &followResourceData{}
-	follow.Pending.Value = user.FollowRequestSent
 	follow.ScreenName.Value = user.ScreenName
 	follow.UserId.Value = user.ID
 	follow.ID.Value = user.ID

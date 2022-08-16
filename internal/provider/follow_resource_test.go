@@ -17,10 +17,7 @@ func TestAccFollowResource(t *testing.T) {
 			// Follow a user
 			{
 				Config: testAccFollowResourceConfig("HashiCorp", -1),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("twitter_follow.acc", "user_id", "290900886"),
-					resource.TestCheckResourceAttr("twitter_follow.acc", "pending", "false"),
-				),
+				Check:  resource.TestCheckResourceAttr("twitter_follow.acc", "user_id", "290900886"),
 			},
 			// Test that following a private user fails
 			{
