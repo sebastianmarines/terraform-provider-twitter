@@ -32,6 +32,28 @@ func TestAccProfileResource(t *testing.T) {
 	})
 }
 
+func TestAccProfileResourceURLs(t *testing.T) {
+	accName := rand.String(5)
+	url := "https://registry.terraform.io/providers/sebastianmarines/twitter/latest"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Test URL
+			{
+				Config: testAccProfileResourceConfig(accName, url, "", ""),
+				Check:  resource.TestCheckResourceAttr("twitter_profile.acc", "url", url),
+			},
+			// Test URL with trailing slash
+			{
+				Config: testAccProfileResourceConfig(accName, url+"/", "", ""),
+				Check:  resource.TestCheckResourceAttr("twitter_profile.acc", "url", url+"/"),
+			},
+		},
+	})
+}
+
 func TestAccProfileResourceValidators(t *testing.T) {
 	accName := rand.String(5)
 	resource.Test(t, resource.TestCase{
