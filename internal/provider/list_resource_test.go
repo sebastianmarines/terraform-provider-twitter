@@ -20,6 +20,15 @@ func TestAccListResource(t *testing.T) {
 					resource.TestCheckResourceAttr("twitter_list.acc", "description", "A terraform list"),
 					resource.TestCheckResourceAttr("twitter_list.acc", "member_count", "0"),
 				),
+				Destroy: false,
+			},
+			{
+				Config: testAccListResourceConfig("Terraform modifier", "public", ""),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("twitter_list.acc", "name", "Terraform modifier"),
+					resource.TestCheckResourceAttr("twitter_list.acc", "mode", "public"),
+					resource.TestCheckResourceAttr("twitter_list.acc", "description", ""),
+				),
 			},
 		},
 	})
