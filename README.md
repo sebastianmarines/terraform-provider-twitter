@@ -20,7 +20,7 @@ terraform {
   required_providers {
     twitter = {
       source  = "sebastianmarines/twitter"
-      version = "~> 0.1.2"
+      version = "~> 0.1.3"
     }
   }
 }
@@ -72,7 +72,7 @@ terraform {
   required_providers {
     twitter = {
       source  = "hashicorp.com/local/twitter"
-      version = "~> 0.1.2"
+      version = "~> 0.1.3"
     }
   }
 }
