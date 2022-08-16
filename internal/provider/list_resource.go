@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -177,8 +180,7 @@ func (t listResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	newList.Mode.Value = list.Mode
 	newList.FullName.Value = list.FullName
 	newList.UserID.Value = int64(list.User.ID)
-	// newList.Description.Value = list.Description
-	newList.Description.Value = data.Description.Value
+	newList.Description.Value = list.Description
 	newList.Name.Value = list.Name
 
 	// Log the user ID
@@ -236,8 +238,7 @@ func (r listResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	newList.Mode.Value = list.Mode
 	newList.FullName.Value = list.FullName
 	newList.UserID.Value = int64(list.User.ID)
-	// newList.Description.Value = list.Description
-	newList.Description.Value = data.Description.Value
+	newList.Description.Value = list.Description
 	newList.Name.Value = list.Name
 
 	diags = req.State.Set(ctx, newList)
@@ -245,11 +246,66 @@ func (r listResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 }
 
 func (r listResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Update is not supported for list resource",
-	)
-	return
+	err := utils.CheckProviderConfiguration(&resp.Diagnostics, r.provider.configured)
+	if err != nil {
+		return
+	}
+
+	var data listResourceData
+	var state listResourceData
+
+	req.State.Get(ctx, &state)
+
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	urlLocation := "https://api.twitter.com/1.1/lists/update.json?list_id=%s&name=%s&mode=%s&description=%s"
+	urlLocation = fmt.Sprintf(urlLocation, url.QueryEscape(strconv.FormatInt(state.ID.Value, 10)), url.QueryEscape(data.Name.Value), url.QueryEscape(data.Mode.Value), url.QueryEscape(data.Description.Value))
+
+	_req, _ := http.NewRequest("POST", urlLocation, nil)
+	_res, _ := r.provider.httpClient.Do(_req)
+
+	if _res.StatusCode != 200 {
+		resp.Diagnostics.AddError(
+			"Could not update list",
+			fmt.Sprintf("Could not update list, got error: %s", _res.Status),
+		)
+		return
+	}
+
+	showParams := &twitter.ListsShowParams{
+		ListID: state.ID.Value,
+	}
+
+	list, _, err := r.provider.client.Lists.Show(showParams)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Could not read list",
+			fmt.Sprintf("Could not update list, got error: %s", err),
+		)
+		return
+	}
+
+	newList := &listResourceData{}
+	newList.Name.Value = list.Name
+	newList.ID.Value = list.ID
+	newList.Slug.Value = list.Slug
+	newList.CreatedAt.Value = list.CreatedAt
+	newList.URI.Value = list.URI
+	newList.SubscriberCount.Value = int64(list.SubscriberCount)
+	newList.MemberCount.Value = int64(list.MemberCount)
+	newList.Mode.Value = list.Mode
+	newList.FullName.Value = list.FullName
+	newList.UserID.Value = int64(list.User.ID)
+	newList.Description.Value = list.Description
+
+	diags = resp.State.Set(ctx, &newList)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r listResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
