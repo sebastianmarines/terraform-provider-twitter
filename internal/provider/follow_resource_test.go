@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -21,11 +22,10 @@ func TestAccFollowResource(t *testing.T) {
 					resource.TestCheckResourceAttr("twitter_follow.acc", "pending", "false"),
 				),
 			},
+			// Test that following a private user fails
 			{
-				Config: testAccFollowResourceConfig("Terraformpriva1", -1),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("twitter_follow.acc", "pending", "false"),
-				),
+				Config:      testAccFollowResourceConfig("Terraformpriva1", -1),
+				ExpectError: regexp.MustCompile("Following private users is not supported"),
 			},
 		},
 	})

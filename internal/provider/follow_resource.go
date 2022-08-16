@@ -98,6 +98,27 @@ func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 		return
 	}
 
+	user, _, err := t.provider.client.Users.Show(&twitter.UserShowParams{
+		ScreenName: data.ScreenName.Value,
+		UserID:     data.UserId.Value,
+	})
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Could not follow user",
+			fmt.Sprintf("Could not follow user: %s", err),
+		)
+		return
+	}
+
+	if user.Protected {
+		resp.Diagnostics.AddError(
+			"Could not follow user",
+			"Following private users is not supported",
+		)
+		return
+	}
+
 	params := &twitter.FriendshipCreateParams{
 		Follow: twitter.Bool(true),
 	}
@@ -109,7 +130,7 @@ func (t followResource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 		params.UserID = data.UserId.Value
 	}
 
-	user, _, err := t.provider.client.Friendships.Create(params)
+	user, _, err = t.provider.client.Friendships.Create(params)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
