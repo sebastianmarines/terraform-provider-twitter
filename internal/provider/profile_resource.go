@@ -47,6 +47,9 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Type:                types.StringType,
 				Optional:            true,
 				Computed:            true,
+				Validators: []tfsdk.AttributeValidator{
+					validators.ValidURL(),
+				},
 			},
 			"location": {
 				MarkdownDescription: "The city or country describing where the user of the account is located. The contents are not normalized or geocoded in any way.",

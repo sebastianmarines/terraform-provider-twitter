@@ -2,6 +2,7 @@ package provider
 
 import (
 	"bytes"
+	"regexp"
 	"testing"
 	"text/template"
 
@@ -22,6 +23,22 @@ func TestAccProfileResource(t *testing.T) {
 			},
 			// Fail when setting `name` to null
 			// Keep same URL
+		},
+	})
+}
+
+func TestAccProfileResourceValidators(t *testing.T) {
+	accName := rand.String(5)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Valid URL
+			{
+				Config:      testAccProfileResourceConfig(accName, "invalid url", "", ""),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("The URL is not a valid URL"),
+			},
 		},
 	})
 }
